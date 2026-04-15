@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Trade Fair Simulation Board</title>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --panel: #ffffff;
+      --border: #d9e0ea;
+      --text: #223043;
+      --muted: #5f6b7a;
+      --visitors: #dff4e4;
+      --tasks: #dfe9ff;
+      --language: #fff6c9;
+      --challenges: #ffe0e0;
+      --culture: #f3e3ff;
+      --student: #e6f7ff;
+      --shadow: 0 10px 30px rgba(20, 36, 61, 0.08);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .wrap {
+      max-width: 1500px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, #1f3b73, #3059a6);
+      color: white;
+      border-radius: 24px;
+      padding: 28px;
+      box-shadow: var(--shadow);
+      margin-bottom: 22px;
+    }
+
+    .hero h1 {
+      margin: 0 0 8px;
+      font-size: 2rem;
+      line-height: 1.1;
+    }
+
+    .hero p {
+      margin: 0;
+      max-width: 900px;
+      color: rgba(255,255,255,0.9);
+      line-height: 1.5;
+    }
+
+    .topbar {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr 1fr;
+      gap: 16px;
+      margin: 20px 0 24px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 18px;
+    }
+
+    .panel h2, .panel h3 {
+      margin: 0 0 12px;
+      font-size: 1rem;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .tag {
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 0.9rem;
+      border: 1px solid var(--border);
+      background: white;
+    }
+
+    .visitors-tag { background: var(--visitors); }
+    .tasks-tag { background: var(--tasks); }
+    .language-tag { background: var(--language); }
+    .challenges-tag { background: var(--challenges); }
+    .culture-tag { background: var(--culture); }
+
+    .student-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .student-card {
+      background: var(--student);
+      border: 1px solid #c8eaff;
+      border-radius: 14px;
+      padding: 12px;
+    }
+
+    .student-card strong { display: block; margin-bottom: 6px; }
+    .student-card span { color: var(--muted); font-size: 0.92rem; }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    button {
+      border: none;
+      border-radius: 12px;
+      padding: 10px 14px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: white;
+      background: #3059a6;
+    }
+
+    button.secondary {
+      background: #5f6b7a;
+    }
+
+    .board {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr 1fr;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .zone {
+      min-height: 400px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+      padding: 18px;
+    }
+
+    .zone h2 {
+      margin: 0 0 14px;
+      font-size: 1.15rem;
+    }
+
+    .columns {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .stack {
+      display: grid;
+      gap: 12px;
+    }
+
+    .sticky {
+      border-radius: 16px;
+      padding: 14px;
+      border: 1px solid rgba(0,0,0,0.08);
+      min-height: 110px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .sticky small {
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-weight: 700;
+      color: #445268;
+    }
+
+    .sticky h4 {
+      margin: 0;
+      font-size: 1rem;
+      line-height: 1.25;
+    }
+
+    .sticky p {
+      margin: 0;
+      font-size: 0.93rem;
+      line-height: 1.45;
+      color: #2d3a4f;
+    }
+
+    .visitors { background: var(--visitors); }
+    .tasks { background: var(--tasks); }
+    .language { background: var(--language); }
+    .challenges { background: var(--challenges); }
+    .culture { background: var(--culture); }
+
+    .scenario-box {
+      margin-top: 14px;
+      border: 2px dashed #9fb4d6;
+      border-radius: 18px;
+      padding: 16px;
+      background: #f8fbff;
+    }
+
+    .scenario-box h3 { margin-top: 0; }
+    .scenario-output {
+      display: grid;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .scenario-pill {
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: white;
+      border: 1px solid var(--border);
+    }
+
+    .footer-note {
+      margin-top: 22px;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    @media (max-width: 1100px) {
+      .topbar, .board, .columns { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <h1>Trade Fair Simulation Board</h1>
+      <p>
+        A visual practice board for networking, socialising, product pitching, active listening, handling pressure,
+        and closing conversations professionally at an international trade fair in Paris.
+      </p>
+    </section>
+
+    <section class="topbar">
+      <div class="panel">
+        <h2>Board Legend</h2>
+        <div class="legend">
+          <span class="tag visitors-tag">Visitor roles</span>
+          <span class="tag tasks-tag">Task cards</span>
+          <span class="tag language-tag">Language support</span>
+          <span class="tag challenges-tag">Pressure cards</span>
+          <span class="tag culture-tag">Culture prompts</span>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Learner Focus</h2>
+        <div class="student-grid">
+          <div class="student-card">
+            <strong>Oksana</strong>
+            <span>Investor-facing dialogue, strategic responses, confident closing.</span>
+          </div>
+          <div class="student-card">
+            <strong>Maryana</strong>
+            <span>Structured speaking support, anxiety reduction, buying-time phrases.</span>
+          </div>
+          <div class="student-card">
+            <strong>Vasyl</strong>
+            <span>Visual prompts, product explanation, reliable fixed phrases.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Scenario Generator</h2>
+        <div class="controls">
+          <button id="generateBtn">Generate scenario</button>
+          <button id="resetBtn" class="secondary">Reset</button>
+        </div>
+        <div class="scenario-box">
+          <h3>Live practice draw</h3>
+          <div id="scenarioOutput" class="scenario-output">
+            <div class="scenario-pill">Click <strong>Generate scenario</strong> to get one visitor, one task, one challenge, and one culture prompt.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="board">
+      <div class="zone">
+        <h2>Visitor Hall</h2>
+        <div class="stack" id="visitorsZone"></div>
+      </div>
+
+      <div class="zone">
+        <h2>Interaction Tasks</h2>
+        <div class="columns">
+          <div class="stack" id="tasksZone"></div>
+          <div class="stack" id="languageZone"></div>
+        </div>
+      </div>
+
+      <div class="zone">
+        <h2>Challenge Corner</h2>
+        <div class="columns">
+          <div class="stack" id="challengesZone"></div>
+          <div class="stack" id="cultureZone"></div>
+        </div>
+      </div>
+    </section>
+
+    <p class="footer-note">
+      Suggested use: each student draws one visitor card, one task card, and one challenge card. An observer can then use the language and culture prompts to support feedback.
+    </p>
+  </div>
+
+  <script>
+    const visitors = [
+      {
+        title: 'French Boutique Buyer',
+        text: 'Looking for distinctive handcrafted products for a concept store in Lyon. Ask about minimum order, delivery time, and what makes the brand unique.'
+      },
+      {
+        title: 'British Distributor',
+        text: 'Friendly but direct. Ask about pricing, reliability, and whether products can be adapted for the UK market.'
+      },
+      {
+        title: 'Paris Trade Journalist',
+        text: 'Curious about cultural story, heritage, inspiration, and what makes the business distinctive.'
+      },
+      {
+        title: 'Museum Shop Curator',
+        text: 'Interested in symbolism, heritage, and whether specific designs have a story suitable for a museum audience.'
+      },
+      {
+        title: 'Scandinavian Retailer',
+        text: 'Values clean design, sustainability, and practical details. Ask about materials, eco values, and capacity.'
+      },
+      {
+        title: 'Investor Visitor',
+        text: 'Exploring whether the business could scale internationally. Ask about growth plans, market focus, and biggest challenges.'
+      },
+      {
+        title: 'Busy Trade Fair Visitor',
+        text: 'Only has two minutes. The exhibitor must open, connect, pitch, and close efficiently.'
+      }
+    ];
+
+    const tasks = [
+      {
+        title: 'Opening Move',
+        text: 'Start a conversation naturally with a visitor who has just stopped at the stand.'
+      },
+      {
+        title: 'Small Talk and Rapport',
+        text: 'Build trust before talking business. Use a safe topic and show genuine interest.'
+      },
+      {
+        title: 'Conversational Pitch',
+        text: 'Introduce the company and products naturally rather than as a memorised speech.'
+      },
+      {
+        title: 'Questions and Active Listening',
+        text: 'Ask at least three relevant questions and respond to the answers.'
+      },
+      {
+        title: 'Managing Pressure',
+        text: 'Respond calmly to an unexpected question using clarification or buying-time language.'
+      },
+      {
+        title: 'Professional Closing',
+        text: 'End professionally, exchange contacts, and suggest next steps.'
+      }
+    ];
+
+    const language = [
+      {
+        title: 'Opening Language',
+        text: 'Hello, welcome. Have you seen Ukrainian embroidery before?'
+      },
+      {
+        title: 'Small Talk Language',
+        text: 'Is this your first day at the fair? Have you seen anything interesting so far?'
+      },
+      {
+        title: 'Pitch Language',
+        text: 'We are a family business from Ukraine specialising in embroidered clothing and handcrafted accessories.'
+      },
+      {
+        title: 'Question Language',
+        text: 'What kind of products are you looking for? Who are your typical customers?'
+      },
+      {
+        title: 'Buying-Time Language',
+        text: 'That is a very good question. Let me think for a moment. What I can say at this stage is...'
+      },
+      {
+        title: 'Closing Language',
+        text: 'It was a pleasure speaking with you. May I give you our contact details?'
+      }
+    ];
+
+    const challenges = [
+      {
+        title: 'Didn’t Understand',
+        text: 'Ask for clarification politely and keep the interaction moving.'
+      },
+      {
+        title: 'Fast Speaker',
+        text: 'Use a strategy to slow the conversation down without sounding abrupt.'
+      },
+      {
+        title: 'Discount Question',
+        text: 'The visitor asks for a discount immediately. Respond diplomatically.'
+      },
+      {
+        title: 'Unknown Answer',
+        text: 'You are not sure about production capacity. Use a buying-time phrase.'
+      },
+      {
+        title: 'Distracted Visitor',
+        text: 'The visitor seems interested but distracted. Re-engage them politely.'
+      },
+      {
+        title: 'Very Direct Visitor',
+        text: 'The visitor asks blunt questions. Adapt your tone and remain professional.'
+      }
+    ];
+
+    const culture = [
+      {
+        title: 'Rapport First',
+        text: 'In many settings, especially in France, some relationship-building before direct business talk can be effective.'
+      },
+      {
+        title: 'Safe Topics',
+        text: 'Use neutral conversation starters rather than personal questions too early.'
+      },
+      {
+        title: 'Polished Tone',
+        text: 'A calm, thoughtful tone may be more persuasive than an overly strong sales style.'
+      },
+      {
+        title: 'Story Matters',
+        text: 'Heritage, craft, and cultural value may be as persuasive as technical product detail.'
+      },
+      {
+        title: 'Indirect Professionalism',
+        text: 'Softened language can sound more professional than blunt yes-or-no responses.'
+      }
+    ];
+
+    function renderCards(items, containerId, typeClass, label) {
+      const container = document.getElementById(containerId);
+      container.innerHTML = '';
+      items.forEach(item => {
+        const card = document.createElement('article');
+        card.className = `sticky ${typeClass}`;
+        card.innerHTML = `
+          <small>${label}</small>
+          <h4>${item.title}</h4>
+          <p>${item.text}</p>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function randomItem(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    function generateScenario() {
+      const pickedVisitor = randomItem(visitors);
+      const pickedTask = randomItem(tasks);
+      const pickedChallenge = randomItem(challenges);
+      const pickedCulture = randomItem(culture);
+
+      const output = document.getElementById('scenarioOutput');
+      output.innerHTML = `
+        <div class="scenario-pill"><strong>Visitor:</strong> ${pickedVisitor.title} — ${pickedVisitor.text}</div>
+        <div class="scenario-pill"><strong>Task:</strong> ${pickedTask.title} — ${pickedTask.text}</div>
+        <div class="scenario-pill"><strong>Challenge:</strong> ${pickedChallenge.title} — ${pickedChallenge.text}</div>
+        <div class="scenario-pill"><strong>Culture prompt:</strong> ${pickedCulture.title} — ${pickedCulture.text}</div>
+      `;
+    }
+
+    function resetScenario() {
+      document.getElementById('scenarioOutput').innerHTML = `
+        <div class="scenario-pill">Click <strong>Generate scenario</strong> to get one visitor, one task, one challenge, and one culture prompt.</div>
+      `;
+    }
+
+    renderCards(visitors, 'visitorsZone', 'visitors', 'Visitor card');
+    renderCards(tasks, 'tasksZone', 'tasks', 'Task card');
+    renderCards(language, 'languageZone', 'language', 'Language support');
+    renderCards(challenges, 'challengesZone', 'challenges', 'Challenge card');
+    renderCards(culture, 'cultureZone', 'culture', 'Culture prompt');
+
+    document.getElementById('generateBtn').addEventListener('click', generateScenario);
+    document.getElementById('resetBtn').addEventListener('click', resetScenario);
+  </script>
+</body>
+</html>
